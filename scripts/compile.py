@@ -23,12 +23,11 @@ def clean_build_directory():
 
 def copy_files():
     print('Copying files')
-    cmd = 'ROBOCOPY {} {} /E'
+    cmd = 'ROBOCOPY {} {} /E /NFL /NDL /NJH /NJS /nc /ns /np'
+    print('Copying source dir')
     subprocess.call(cmd.format(SOURCE_DIR, BUILD_DIR))
+    print('Copying third party dir')
     subprocess.call(cmd.format(THIRD_PARTY_DIR, BUILD_DIR))
-
-    # shutil.copytree(SOURCE_DIR, BUILD_DIR)
-    # shutil.copy2(THIRD_PARTY_DIR, BUILD_DIR)
 
 def compile():
     print('Compiling')

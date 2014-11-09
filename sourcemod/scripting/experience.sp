@@ -18,6 +18,9 @@ public Plugin:myinfo =
 #define SUPPORT_ITEM_XP_RATIO 0.3
 #define TEAM_XP_RATIO         0.2
 
+#define UPGRADE_PACK_INCENDIARY 428
+#define UPGRADE_PACK_EXPLOSIVE 429
+
 /**
  * THE EXP ALGORITHM OF UPGRADEMOD:
  * 
@@ -119,17 +122,40 @@ public Action:PlayerDeathEvent(Handle:event, const String:name[], bool:dontBroad
 public Action:PlayerHealSuccessEvent(Handle:event, const String:name[], bool:dontBroadcast)
 {
     new iHealthRestored = GetEventInt(event, "health_restored");
+    new iUserId = GetEventInt(event, "userid");
+    new iHealer = GetClientOfUserId(iUserId);
     
     AwardTeam(iHealthRestored);
+    GiveWeaponExperience(iHealer, "weapon_first_aid_kit", iHealthRestored * 2);
 }
 
 public Action:PlayerRevivedEvent(Handle:event, const String:name[], bool:dontBroadcast)
 {
+    new iUserId = GetEventInt(event, "userid");
+    new iHealer = GetClientOfUserId(iUserId);
+    
     AwardTeam(PLAYER_REVIVED_EXPERIENCE);
+    GiveWeaponExperience(iHealer, "weapon_first_aid_kit", PLAYER_REVIVED_EXPERIENCE * 2);
 }
 
 public Action:UpgradePackUsedEvent(Handle:event, const String:name[], bool:dontBroadcast)
 {
+    new iUserId = GetEventInt(event, "userid");
+    new iDeployer = GetClientOfUserId(iUserId);
+    new iUpgradeID = GetEventInt(event, "upgradeid");
+    
+    switch(iUpgradeID)
+    {
+        case UPGRADE_PACK_INCENDIARY:
+        {
+            GiveWeaponExperience(iDeployer, "weapon_upgradepack_incendiary", UPGRADE_PACK_USED_EXPERIENCE * 2);
+        }
+        case UPGRADE_PACK_EXPLOSIVE:
+        {
+            GiveWeaponExperience(iDeployer, "weapon_upgradepack_explosive", UPGRADE_PACK_USED_EXPERIENCE * 2);
+        }
+    }
+    
     AwardTeam(UPGRADE_PACK_USED_EXPERIENCE);
 }
 
