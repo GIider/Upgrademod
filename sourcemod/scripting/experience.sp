@@ -18,9 +18,6 @@ public Plugin:myinfo =
 #define SUPPORT_ITEM_XP_RATIO 0.3
 #define TEAM_XP_RATIO         0.2
 
-#define UPGRADE_PACK_INCENDIARY 428
-#define UPGRADE_PACK_EXPLOSIVE 429
-
 /**
  * THE EXP ALGORITHM OF UPGRADEMOD:
  * 
@@ -144,16 +141,20 @@ public Action:UpgradePackUsedEvent(Handle:event, const String:name[], bool:dontB
     new iDeployer = GetClientOfUserId(iUserId);
     new iUpgradeID = GetEventInt(event, "upgradeid");
     
-    switch(iUpgradeID)
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    GetEdictClassname(iUpgradeID, sWeaponName, sizeof(sWeaponName));
+
+    if(StrEqual(sWeaponName, "upgrade_ammo_explosive"))
     {
-        case UPGRADE_PACK_INCENDIARY:
-        {
-            GiveWeaponExperience(iDeployer, "weapon_upgradepack_incendiary", UPGRADE_PACK_USED_EXPERIENCE * 2);
-        }
-        case UPGRADE_PACK_EXPLOSIVE:
-        {
-            GiveWeaponExperience(iDeployer, "weapon_upgradepack_explosive", UPGRADE_PACK_USED_EXPERIENCE * 2);
-        }
+        GiveWeaponExperience(iDeployer, "weapon_upgradepack_explosive", UPGRADE_PACK_USED_EXPERIENCE * 2);
+    }
+    else if(StrEqual(sWeaponName, "upgrade_ammo_incendiary"))
+    {
+        GiveWeaponExperience(iDeployer, "weapon_upgradepack_incendiary", UPGRADE_PACK_USED_EXPERIENCE * 2);
+    }
+    else
+    {
+        Upgrademod_LogError("Invalid upgrade pack with name \"%s\" deployed", sWeaponName);
     }
     
     AwardTeam(UPGRADE_PACK_USED_EXPERIENCE);
