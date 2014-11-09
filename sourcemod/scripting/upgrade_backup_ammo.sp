@@ -2,7 +2,7 @@
 
 public Plugin:myinfo = 
 {
-    name = "Upgrademod - Upgrade - Ammo Types",
+    name = "Upgrademod - Upgrade - Backup Ammo",
     author = "Glider",
 };
 

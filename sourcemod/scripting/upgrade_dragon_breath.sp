@@ -2,7 +2,7 @@
 
 public Plugin:myinfo = 
 {
-    name = "Upgrademod - Upgrade - Melee Upgrades",
+    name = "Upgrademod - Upgrade - Dragon Breath",
     author = "Glider",
 };
 

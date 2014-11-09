@@ -2,7 +2,7 @@
 
 public Plugin:myinfo = 
 {
-    name = "Upgrademod - Engine - Weapon",
+    name = "Upgrademod - Engine - Upgrades",
     author = "Glider",
 };
 

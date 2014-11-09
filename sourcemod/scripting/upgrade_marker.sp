@@ -2,7 +2,7 @@
 
 public Plugin:myinfo = 
 {
-    name = "Upgrademod - Engine - Ammo Control",
+    name = "Upgrademod - Upgrade - Tracer Rounds",
     author = "Glider",
 };
 

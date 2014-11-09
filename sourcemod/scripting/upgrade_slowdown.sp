@@ -2,7 +2,7 @@
 
 public Plugin:myinfo = 
 {
-    name = "Upgrademod - Engine - Ammo Control",
+    name = "Upgrademod - Upgrade - Zedtime",
     author = "Glider",
 };
 
