@@ -23,7 +23,7 @@ def clean_build_directory():
 
 def copy_files():
     print('Copying files')
-    cmd = 'ROBOCOPY {} {} /E /PURGE'
+    cmd = 'ROBOCOPY {} {} /E'
     subprocess.call(cmd.format(SOURCE_DIR, BUILD_DIR))
     subprocess.call(cmd.format(THIRD_PARTY_DIR, BUILD_DIR))
 
