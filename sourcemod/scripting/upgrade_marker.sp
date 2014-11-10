@@ -32,7 +32,7 @@ public OnClientPutInServer(client)
 
 public Action:SDK_Forwarded_OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-    if(IsValidPlayer(attacker, true))
+    if(IsValidPlayer(attacker, true) && (damagetype & DMG_BULLET))
     {
         new iCurrentWeapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
         decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
