@@ -6,6 +6,8 @@ public Plugin:myinfo =
     author = "Glider",
 };
 
+// Based on https://forums.alliedmods.net/showthread.php?p=1606590
+
 #define FLARE_ALIVE_TIMER 30.0
 #define FLARE_MARK_DISTANCE 100.0
 #define FLARE_MARK_DURATION 0.1
@@ -93,6 +95,26 @@ new g_ClientProgressID[MAXPLAYERS+1];
 // TODO: Add a check so this can't overwrite another progress bar
 public ActivateProgressBar(client, Float:fTime)
 {
+    new iCurrentWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+
+    if (!IsValidEntity(iCurrentWeapon))
+    {
+        return -1;
+    }
+    
+    GetEdictClassname(iCurrentWeapon, sWeaponName, sizeof(sWeaponName));
+    if(!IsTierOneWeapon(sWeaponName))
+    {
+        return -1;
+    }
+    
+    new level = GetUpgradeLevel(client, flare, sWeaponName);
+    if (level == 0)
+    {
+        return -1;
+    }
+    
     new client_ref = EntIndexToEntRef(client);
     
     if (!g_bIsMakingProgress[client]) 
