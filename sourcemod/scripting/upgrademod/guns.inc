@@ -75,6 +75,24 @@ stock Handle:GetUpgradeableItemStack()
     return hWeaponStack;
 }
 
+stock bool:CouldConsumePrimaryMagazineFromPool(client)
+{
+    new iPrimaryWeapon = GetPlayerWeaponSlot(client, 0);
+    if (!IsValidEntity(iPrimaryWeapon))
+    {
+        return false;
+    }
+
+    decl String:sWeaponName[64];
+    GetEdictClassname(iPrimaryWeapon, sWeaponName, sizeof(sWeaponName));
+    
+    new iMaxMagSize = GetMaxMagSize(sWeaponName);
+    new iBackupAmmo = GetCurrentBackupAmmo(client);
+    
+    return iBackupAmmo >= iMaxMagSize;
+
+}
+
 stock bool:ConsumePrimaryMagazineFromPool(client)
 {
     new iPrimaryWeapon = GetPlayerWeaponSlot(client, 0);

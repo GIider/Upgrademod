@@ -115,6 +115,11 @@ public ActivateProgressBar(client, Float:fTime)
         return -1;
     }
     
+    if(!CouldConsumePrimaryMagazineFromPool(client))
+    {
+        return -1;
+    }
+    
     new client_ref = EntIndexToEntRef(client);
     
     if (!g_bIsMakingProgress[client]) 
@@ -153,10 +158,13 @@ public Action:TimerProgressBarSuccess(Handle:timer, any:client_ref)
     {
         KillProgressBar(client);
         
-        new flare_entity = CreateFlare(client, "200 20 15", "200 20 15");
-        if (IsValidEntity(flare_entity))
+        if (ConsumePrimaryMagazineFromPool(client))
         {
-            PushArrayCell(hExistingFlaresArray, flare_entity);
+            new flare_entity = CreateFlare(client, "200 20 15", "200 20 15");
+            if (IsValidEntity(flare_entity))
+            {
+                PushArrayCell(hExistingFlaresArray, flare_entity);
+            }
         }
     }
     
