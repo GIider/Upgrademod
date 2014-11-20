@@ -223,11 +223,3 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
         maxlevel = MAX_LEVEL;
     }
 }
-
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if (upgrade == upgrade_db)
-    {
-        experience = level * 10000;
-    }
-}

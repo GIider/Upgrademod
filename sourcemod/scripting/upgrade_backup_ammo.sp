@@ -62,21 +62,6 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
     }
 }
 
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if(upgrade == backupAmmo)
-    {
-        if(IsTierOneWeapon(sWeaponName))
-        {
-            experience = level * 1500;
-        }
-        else
-        {
-            experience = level * 6000;
-        }
-    }
-}
-
 public Event_PlayerUse(Handle:event, const String:name[], bool:dontBroadcast)
 {
     new client = GetClientOfUserId(GetEventInt(event, "userid"));

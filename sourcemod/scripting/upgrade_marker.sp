@@ -139,18 +139,3 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
         }
     }
 }
-
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if(upgrade == marker)
-    {
-        if(IsSMG(sWeaponName))
-        {
-            experience = level * 3000;
-        }
-        else if (IsSniper(sWeaponName))
-        {
-            experience = level * 7500;
-        }
-    }
-}

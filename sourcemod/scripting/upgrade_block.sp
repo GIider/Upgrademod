@@ -99,11 +99,3 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
         maxlevel = 5;
     }
 }
-
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if(upgrade == block)
-    {
-        experience = level * 2500;
-    }
-}

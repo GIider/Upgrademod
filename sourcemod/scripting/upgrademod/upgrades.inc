@@ -25,6 +25,9 @@ native GetUpgradeMaxLevel(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
 native GetUpgradeExperienceRequired(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
 
+native Float:GetUpgradeExperienceModifier(upgrade);
+native RegisterUpgradeExperienceModifierConVar(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH]);
+
 native SetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
 native GetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 

@@ -119,6 +119,8 @@ Internal_RegisterUpgrade(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH])
             PushArrayCell(hModifications, hUpgradeNames);
         }
         
+        RegisterUpgradeExperienceModifierConVar(sUpgradeShortname);
+        
         return index;
     }
     
@@ -279,17 +281,19 @@ public Native_GetUpgradeExperienceRequired(Handle:plugin, numParams)
         return false;
     }
     new level = GetNativeCell(3);
-    
-    new result;
+    new experience = INVALID_EXPERIENCE;
 
     Call_StartForward(hRequestedUpgradeExperienceRequired);
     Call_PushCell(upgrade);
     Call_PushString(sWeaponName);
     Call_PushCell(level);
-    Call_PushCellRef(result);
+    Call_PushCellRef(experience);
     Call_Finish();
     
-    return result;
+    // Allow default handling
+    experience = PostOnUpgradeExperienceRequiredRequested(upgrade, sWeaponName, level, experience);
+    
+    return experience;
 }
 
 public Native_GetUpgradeLevel(Handle:plugin, numParams)
@@ -361,4 +365,42 @@ WipeModifiedArray(client)
     
     new Handle:hArray = hModifiedUpgrades[client];
     ClearArray(hArray);
+}
+
+PostOnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, experience)
+{
+    if(experience == INVALID_EXPERIENCE)
+    {
+        new constant;
+        new Float:fModifier;
+        new Float:fConVarModifier = GetUpgradeExperienceModifier(upgrade);
+        
+        // perform default calculation
+        if(IsTierOneWeapon(sWeaponName))
+        {
+            constant = TIER_ONE_COSTS;
+            fModifier = TIER_ONE_MODIFIER;
+        }
+        else if(IsTierTwoWeapon(sWeaponName))
+        {
+            constant = TIER_TWO_COSTS;
+            fModifier = TIER_TWO_MODIFIER;
+        }
+        else if(IsMeleeWeapon(sWeaponName))
+        {
+            constant = MELEE_COSTS;
+            fModifier = MELEE_MODIFIER;
+        }
+        else
+        {
+            Upgrademod_LogError("Could not calculate default exp for weapon \"%s\"", sWeaponName);
+            experience = 99999999;
+            
+            return experience;
+        }
+        
+        experience = RoundToCeil((constant + level * (constant * level * fModifier)) * fConVarModifier);
+    }
+    
+    return experience;
 }

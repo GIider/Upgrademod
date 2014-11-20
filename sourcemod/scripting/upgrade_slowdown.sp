@@ -130,11 +130,3 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
         maxlevel = 1;
     }
 }
-
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if(upgrade == zedtime)
-    {
-        experience = 10000;
-    }
-}

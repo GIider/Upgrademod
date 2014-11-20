@@ -11,4 +11,7 @@ forward bool:OnIsUpgradeAvailableForWeapon(upgrade, String:sWeaponName[WEAPON_NA
 forward OnUpgradeNameRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], String:sUpgradeName[UPGRADE_NAME_MAXLENGTH]);
 forward OnUpgradeDescriptionRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, String:sUpgradeDescription[UPGRADE_DESCRIPTION_MAXLENGTH]);
 forward OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], &maxlevel);
+
+// This is called with a default experience of -1
+// When no plugin modifies the experience a default calculation is performed
 forward OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience);

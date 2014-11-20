@@ -19,8 +19,20 @@
 // Max length for a weapon
 #define WEAPON_NAME_MAXLENGTH 64
 
-// Max name for a upgrade
-//#define UPGRADE_NAME_MAXLENGTH UPGRADE_SHORTNAME_MAXLENGTH + WEAPON_NAME_MAXLENGTH
-
 #define MODEL_GASCAN    "models/props_junk/gascan001a.mdl"
 #define MODEL_PROPANE   "models/props_junk/propanecanister001a.mdl"
+
+// Max length for a convar
+#define CONVAR_MAXLENGTH UPGRADE_SHORTNAME_MAXLENGTH + 20
+
+// Default costs for upgrades
+
+#define TIER_ONE_MODIFIER 0.75
+#define TIER_TWO_MODIFIER 1.0
+#define MELEE_MODIFIER 0.95
+
+#define TIER_ONE_COSTS 500
+#define TIER_TWO_COSTS 1000
+#define MELEE_COSTS 900
+
+#define INVALID_EXPERIENCE -1

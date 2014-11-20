@@ -156,15 +156,6 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
     }
 }
 
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if (upgrade == upgrade_grenade)
-    {
-        experience = level * 8000;
-    }
-}
-
-
 //=======================================================================
 //                                 GRENADE LAUNCHER
 //=======================================================================

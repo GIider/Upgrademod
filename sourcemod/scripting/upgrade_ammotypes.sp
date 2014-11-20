@@ -125,11 +125,3 @@ public OnUpgradeMaxLevelRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLEN
         maxlevel = 10;
     }
 }
-
-public OnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, &experience)
-{
-    if(upgrade == special_ammo_incendiary || upgrade == special_ammo_explosive)
-    {
-        experience = level * 5000;
-    }
-}
