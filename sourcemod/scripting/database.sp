@@ -43,19 +43,20 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 public OnAllPluginsLoaded()
 {
-    SQL_TConnect(ConnectThreadedDatabase);
+    ConnectToDatabase();
 }
 
-public ConnectThreadedDatabase(Handle:owner, Handle:hndl, const String:error[], any:data)
+public ConnectToDatabase()
 {
-    if (hndl == INVALID_HANDLE)
+    decl String:sErrorBuffer[1000];
+    hThreadedDB = SQL_Connect("default", true, sErrorBuffer, sizeof(sErrorBuffer));
+    
+    if (hThreadedDB == INVALID_HANDLE)
     {
-        Upgrademod_LogCritical("Database failure: %s", error);
+        Upgrademod_LogCritical("Database failure: %s", sErrorBuffer);
     } 
     else 
     {
-        hThreadedDB = hndl;
-
         decl String:sDBMS[64];
         SQL_ReadDriver(hThreadedDB, sDBMS, sizeof(sDBMS));
         if (!StrEqual(sDBMS, "sqlite", false))
