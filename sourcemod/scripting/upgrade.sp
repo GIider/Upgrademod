@@ -34,7 +34,10 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     
     CreateNative("GetAmountOfUpgrades", Native_GetAmountOfUpgrades);
     CreateNative("WeaponHasUpgrades", Native_WeaponHasUpgrades);
-
+    
+    CreateNative("GetAmountOfPurchasedUpgrades", Native_GetAmountOfPurchasedUpgrades);
+    CreateNative("GetAmountOfAvailableUpgrades", Native_GetAmountOfAvailableUpgrades);
+    
     CreateNative("GetUpgradeName", Native_GetUpgradeName);
     CreateNative("GetUpgradeDescription", Native_GetUpgradeDescription);
     CreateNative("GetUpgradeMaxLevel", Native_GetUpgradeMaxLevel);
@@ -165,6 +168,52 @@ public Native_WeaponHasUpgrades(Handle:plugin, numParams)
     }
     
     return false;
+}
+
+public Native_GetAmountOfPurchasedUpgrades(Handle:plugin, numParams)
+{
+    new client = GetNativeCell(1);
+    
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    GetNativeString(2, sWeaponName, sizeof(sWeaponName));
+    
+    return Internal_GetAmountOfPurchasedUpgrades(client, sWeaponName);
+}
+
+Internal_GetAmountOfPurchasedUpgrades(client, String:sWeaponName[WEAPON_NAME_MAXLENGTH])
+{
+    new counter = 0;
+    for(new upgrade=0; upgrade < Internal_GetAmountOfUpgrades(); upgrade++)
+    {
+        if(IsUpgradeAvailableForWeapon(upgrade, sWeaponName))
+        {
+            counter += GetUpgradeLevel(client, upgrade, sWeaponName);
+        }
+    }
+    
+    return counter;
+}
+
+public Native_GetAmountOfAvailableUpgrades(Handle:plugin, numParams)
+{
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    GetNativeString(1, sWeaponName, sizeof(sWeaponName));
+    
+    return Internal_GetAmountOfAvailableUpgrades(sWeaponName);
+}
+
+Internal_GetAmountOfAvailableUpgrades(String:sWeaponName[WEAPON_NAME_MAXLENGTH])
+{
+    new counter = 0;
+    for(new upgrade=0; upgrade < Internal_GetAmountOfUpgrades(); upgrade++)
+    {
+        if(IsUpgradeAvailableForWeapon(upgrade, sWeaponName))
+        {
+            counter += GetUpgradeMaxLevel(upgrade, sWeaponName);
+        }
+    }
+    
+    return counter;
 }
 
 Internal_GetAmountOfUpgrades()

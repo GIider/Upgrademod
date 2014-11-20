@@ -13,6 +13,9 @@ native bool:IsUpgradeAvailableForWeapon(upgrade, String:sWeaponName[WEAPON_NAME_
 // Returns the amount of upgrades
 native GetAmountOfUpgrades();
 
+native GetAmountOfAvailableUpgrades(String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
+native GetAmountOfPurchasedUpgrades(client, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
+
 native bool:WeaponHasUpgrades(String:sWeaponname[WEAPON_NAME_MAXLENGTH]);
 
 // Retrieve the description for this upgrade

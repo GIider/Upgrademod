@@ -97,7 +97,11 @@ ShowUpgradeMenu(client)
     Format(sLine, sizeof(sLine), "You have %d experience left for this weapon", experience);
     DrawPanelText(panel, sLine);
 
-    DrawPanelItem(panel, "Upgrade", WeaponHasUpgrades(sWeaponName) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+    new amount_of_upgrades = GetAmountOfPurchasedUpgrades(client, sWeaponName);
+    new max_amount_of_upgrades = GetAmountOfAvailableUpgrades(sWeaponName);
+    Format(sLine, sizeof(sLine), "Upgrade (%d / %d)", amount_of_upgrades, max_amount_of_upgrades);
+    
+    DrawPanelItem(panel, sLine, WeaponHasUpgrades(sWeaponName) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
     DrawPanelItem(panel, "Close");
     DrawPanelItem(panel, "Give yourself free EXP", GetAdminFlag(GetUserAdmin(client), Admin_RCON) == true ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
     DrawPanelItem(panel, "Browse all upgrades");
