@@ -14,6 +14,14 @@ public OnUpgrademodDatabaseLoaded(Handle:hDB)
     zedtime = RegisterUpgrade("zedtime");
 }
 
+public OnMapStart()
+{
+    for(new client=0; client <= MaxClients; client++)
+    {
+        fZedTimeCooldown[client] = 0.0;
+    }
+}
+
 public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon)
 {
     if (!IsValidPlayer(client, true))
