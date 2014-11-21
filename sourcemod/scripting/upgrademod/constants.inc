@@ -29,5 +29,3 @@
 
 #define COST_STARTING            400
 #define COST_PERCENTAGE_INCREASE 1.05
-
-#define INVALID_EXPERIENCE -1

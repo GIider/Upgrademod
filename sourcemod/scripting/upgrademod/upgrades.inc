@@ -27,13 +27,13 @@ native GetUpgradeName(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], String
 
 native GetUpgradeMaxLevel(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
-native GetUpgradeExperienceRequired(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
-
-native Float:GetUpgradeExperienceModifier(upgrade);
-native RegisterUpgradeExperienceModifierConVar(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH]);
+native GetExperienceRequiredForNextUpgrade(client);
 
 native SetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
 native GetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
+
+native PurchasePermanentUpgrade(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
+native PurchaseTemporaryUpgrade(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
 // Returns the handle to a adt_array that contains
 // a adt_array that you can index with a upgrade number

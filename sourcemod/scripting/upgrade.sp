@@ -18,17 +18,18 @@ new Handle:hPlayerUpgrades[MAXPLAYERS];
 // of weaponNames that were modified
 new Handle:hModifiedUpgrades[MAXPLAYERS];
 
-new Handle:hUpgradeArray;
+new Handle:hPermanentUpgradeArray;
 
 new Handle:hUpgradeAvailableForWeapon;
 new Handle:hRequestUpgradeDescription;
 new Handle:hRequestUpgradeName;
 new Handle:hRequestUpgradeMaxLevel;
-new Handle:hRequestedUpgradeExperienceRequired;
+new Handle:hUpgradePurchased;
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
-    CreateNative("RegisterUpgrade", Native_RegisterUpgrade);
+    CreateNative("RegisterUpgrade", Native_RegisterPermanentUpgrade);
+    
     CreateNative("GetUpgradeShortname", Native_GetUpgradeShortname);
     CreateNative("GetUpgradeIndex", Native_GetUpgradeIndex);
     
@@ -37,17 +38,19 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     
     CreateNative("GetAmountOfPurchasedUpgrades", Native_GetAmountOfPurchasedUpgrades);
     CreateNative("GetAmountOfAvailableUpgrades", Native_GetAmountOfAvailableUpgrades);
-    CreateNative("GetTotalAmountOfPurchasedUpgrades", Native_GetTotalAmountOfPurchasedUpgrades);
+    CreateNative("GetExperienceRequiredForNextUpgrade", Native_GetTotalAmountOfPurchasedUpgrades);
     
     CreateNative("GetUpgradeName", Native_GetUpgradeName);
     CreateNative("GetUpgradeDescription", Native_GetUpgradeDescription);
     CreateNative("GetUpgradeMaxLevel", Native_GetUpgradeMaxLevel);
-    CreateNative("GetUpgradeExperienceRequired", Native_GetUpgradeExperienceRequired);
+    CreateNative("GetUpgradeExperienceRequired", Native_GetExperienceRequiredForNextUpgrade);
     
     CreateNative("IsUpgradeAvailableForWeapon", Native_IsUpgradeAvailableForWeapon);
     
     CreateNative("SetUpgradeLevel", Native_SetUpgradeLevel);
     CreateNative("GetUpgradeLevel", Native_GetUpgradeLevel);
+    CreateNative("PurchaseTemporaryUpgrade", Native_PurchaseTemporaryUpgrade);
+    CreateNative("PurchasePermanentUpgrade", Native_PurchasePermanentUpgrade);
 
     CreateNative("GetModifiedUpgradeArray", Native_GetModifiedUpgradeArray);
     CreateNative("ClearModifiedUpgradeArray", Native_ClearModifiedUpgradeArray);
@@ -56,20 +59,25 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     hRequestUpgradeDescription = CreateGlobalForward("OnUpgradeDescriptionRequested", ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_String);
     hRequestUpgradeName = CreateGlobalForward("OnUpgradeNameRequested", ET_Ignore, Param_Cell, Param_String, Param_String);
     hRequestUpgradeMaxLevel = CreateGlobalForward("OnUpgradeMaxLevelRequested", ET_Ignore, Param_Cell, Param_String, Param_CellByRef);
-    hRequestedUpgradeExperienceRequired = CreateGlobalForward("OnUpgradeExperienceRequiredRequested", ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_CellByRef);
+    hUpgradePurchased = CreateGlobalForward("OnUpgradePurchased", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
     
     return APLRes_Success;
 }
 
 public OnPluginStart()
 {
-    hUpgradeArray = CreateArray(UPGRADE_SHORTNAME_MAXLENGTH);
+    hPermanentUpgradeArray = CreateArray(UPGRADE_SHORTNAME_MAXLENGTH);
     
     for(new client=0; client < MAXPLAYERS; client++)
     {
         hPlayerUpgrades[client] = CreateArray(1);
         hModifiedUpgrades[client] = CreateArray(1);
     }
+}
+
+public OnMapStart()
+{
+    PrecacheParticle("achieved");
 }
 
 public OnClientDisconnect(client)
@@ -91,7 +99,7 @@ ResetUpgradeStruct(client)
     }
 }
  
-public Native_RegisterUpgrade(Handle:plugin, numParams)
+public Native_RegisterPermanentUpgrade(Handle:plugin, numParams)
 {
     decl String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH];
     if(GetNativeString(1, sUpgradeShortname, sizeof(sUpgradeShortname)) != SP_ERROR_NONE)
@@ -100,17 +108,17 @@ public Native_RegisterUpgrade(Handle:plugin, numParams)
         return -1;
     }
     
-    return Internal_RegisterUpgrade(sUpgradeShortname);
+    return Internal_RegisterPermanentUpgrade(sUpgradeShortname);
 }
 
-Internal_RegisterUpgrade(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH])
+Internal_RegisterPermanentUpgrade(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH])
 {
-    new index = FindStringInArray(hUpgradeArray, sUpgradeShortname);
+    new index = FindStringInArray(hPermanentUpgradeArray, sUpgradeShortname);
     
     if (index == -1)
     {
         Upgrademod_LogInfo("Registered new upgrade: \"%s\"", sUpgradeShortname);
-        index = PushArrayString(hUpgradeArray, sUpgradeShortname);
+        index = PushArrayString(hPermanentUpgradeArray, sUpgradeShortname);
         
         for(new client=0; client < MAXPLAYERS; client++)
         {
@@ -122,8 +130,6 @@ Internal_RegisterUpgrade(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH])
             new Handle:hUpgradeNames = CreateArray(WEAPON_NAME_MAXLENGTH);
             PushArrayCell(hModifications, hUpgradeNames);
         }
-        
-        RegisterUpgradeExperienceModifierConVar(sUpgradeShortname);
         
         return index;
     }
@@ -137,7 +143,7 @@ public Native_GetUpgradeShortname(Handle:plugin, numParams)
     new index = GetNativeCell(1);
     
     decl String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH];
-    GetArrayString(hUpgradeArray, index, sUpgradeShortname, sizeof(sUpgradeShortname));
+    GetArrayString(hPermanentUpgradeArray, index, sUpgradeShortname, sizeof(sUpgradeShortname));
     
     SetNativeString(2, sUpgradeShortname, sizeof(sUpgradeShortname));
 }
@@ -147,7 +153,7 @@ public Native_GetUpgradeIndex(Handle:plugin, numParams)
     decl String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH];
     GetNativeString(1, sUpgradeShortname, sizeof(sUpgradeShortname));
     
-    return FindStringInArray(hUpgradeArray, sUpgradeShortname);
+    return FindStringInArray(hPermanentUpgradeArray, sUpgradeShortname);
 }
 
 public Native_GetAmountOfUpgrades(Handle:plugin, numParams)
@@ -229,8 +235,6 @@ Internal_GetTotalAmountOfPurchasedUpgrades(client)
     return counter;
 }
 
-
-
 public Native_GetAmountOfAvailableUpgrades(Handle:plugin, numParams)
 {
     decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
@@ -255,7 +259,7 @@ Internal_GetAmountOfAvailableUpgrades(String:sWeaponName[WEAPON_NAME_MAXLENGTH])
 
 Internal_GetAmountOfUpgrades()
 {
-    return GetArraySize(hUpgradeArray);
+    return GetArraySize(hPermanentUpgradeArray);
 }
 
 public Native_IsUpgradeAvailableForWeapon(Handle:plugin, numParams)
@@ -358,29 +362,11 @@ public Native_GetUpgradeMaxLevel(Handle:plugin, numParams)
     return result;
 }
 
-public Native_GetUpgradeExperienceRequired(Handle:plugin, numParams)
+public Native_GetExperienceRequiredForNextUpgrade(Handle:plugin, numParams)
 {
     new client = GetNativeCell(1);
-    new upgrade = GetNativeCell(2);
-    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
-    if(GetNativeString(3, sWeaponName, sizeof(sWeaponName)) != SP_ERROR_NONE)
-    {
-        return false;
-    }
-    new level = GetNativeCell(4);
-    new experience = INVALID_EXPERIENCE;
 
-    Call_StartForward(hRequestedUpgradeExperienceRequired);
-    Call_PushCell(upgrade);
-    Call_PushString(sWeaponName);
-    Call_PushCell(level);
-    Call_PushCellRef(experience);
-    Call_Finish();
-    
-    // Allow default handling
-    experience = PostOnUpgradeExperienceRequiredRequested(client, upgrade, sWeaponName, level, experience);
-    
-    return experience;
+    return Internal_GetExperienceRequiredForNextUpgrade(client);
 }
 
 public Native_GetUpgradeLevel(Handle:plugin, numParams)
@@ -414,7 +400,12 @@ public Native_SetUpgradeLevel(Handle:plugin, numParams)
 
     new level = GetNativeCell(4);
     
-    Upgrademod_LogInfo("Trying to set upgrade level for client %d - upgrade %d", client, upgrade);
+    Internal_SetUpgradeLevel(client, upgrade, sWeaponName, level);
+}
+
+Internal_SetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level)
+{
+    //Upgrademod_LogInfo("Trying to set upgrade level for client %d - upgrade %d", client, upgrade);
     
     new Handle:hPlayerUpgradeArray = hPlayerUpgrades[client];
     new Handle:hUpgradeTrie = GetArrayCell(hPlayerUpgradeArray, upgrade);
@@ -428,6 +419,49 @@ public Native_SetUpgradeLevel(Handle:plugin, numParams)
     if(FindStringInArray(hUpgradeNames, sWeaponName) == -1)
     {
         PushArrayString(hUpgradeNames, sWeaponName);
+    }
+    
+    Call_StartForward(hUpgradePurchased);
+    Call_PushCell(client);
+    Call_PushCell(upgrade);
+    Call_PushCell(level);
+    Call_Finish();
+}
+
+public Native_PurchaseTemporaryUpgrade(Handle:plugin, numParams)
+{
+    new client = GetNativeCell(1);
+    new upgrade = GetNativeCell(2);
+    
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    GetNativeString(3, sWeaponName, sizeof(sWeaponName));
+
+    Call_StartForward(hUpgradePurchased);
+    Call_PushCell(client);
+    Call_PushCell(upgrade);
+    Call_PushCell(-1);
+    Call_Finish();
+}
+
+public Native_PurchasePermanentUpgrade(Handle:plugin, numParams)
+{
+    new client = GetNativeCell(1);
+    new upgrade = GetNativeCell(2);
+    
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    GetNativeString(3, sWeaponName, sizeof(sWeaponName));
+
+    new desired_level = GetUpgradeLevel(client, upgrade, sWeaponName) + 1;
+    new experience_required = GetExperienceRequiredForNextUpgrade(client);
+    
+    if(RemoveWeaponExperience(client, sWeaponName, experience_required))
+    {
+        Upgrade_ChatMessage(client, "You purchased an upgrade!");
+        SetUpgradeLevel(client, upgrade, sWeaponName, desired_level);
+    }
+    else
+    {
+        Upgrademod_LogError("Not enough dosh!?");
     }
 }
 
@@ -454,27 +488,22 @@ WipeModifiedArray(client)
     ClearArray(hArray);
 }
 
-PostOnUpgradeExperienceRequiredRequested(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, experience)
+Internal_GetExperienceRequiredForNextUpgrade(client)
 {
-    if(experience == INVALID_EXPERIENCE)
-    {
-        new upgrades_purchased = Internal_GetTotalAmountOfPurchasedUpgrades(client);
-        new Float:fConVarModifier = GetUpgradeExperienceModifier(upgrade);
+    new upgrades_purchased = Internal_GetTotalAmountOfPurchasedUpgrades(client);
 
-        experience = RoundToCeil(CalculateExperienceRequired(upgrades_purchased + 1) * fConVarModifier);
-    }
-    
-    return experience;
-}
-
-CalculateExperienceRequired(upgrade_number)
-{
-    if(upgrade_number == 1)
+    if(upgrades_purchased == 1)
     {
         return COST_STARTING;
     }
     else
     {
-        return RoundToCeil(CalculateExperienceRequired(upgrade_number - 1) * COST_PERCENTAGE_INCREASE);
+        return RoundToCeil(GetExperienceRequiredForNextUpgrade(upgrades_purchased - 1) * COST_PERCENTAGE_INCREASE);
     }
+}
+
+// PARTY HARD!!
+public OnUpgradePurchased(client, upgrade, level)
+{
+    AttachThrowAwayParticle(client, "achieved", NULL_VECTOR, "eyes", 5.0);
 }

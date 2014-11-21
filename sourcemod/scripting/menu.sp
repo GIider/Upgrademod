@@ -27,16 +27,6 @@ public OnPluginStart()
     HookEvent("ammo_pickup", Event_AmmoPickup);
 }
 
-public OnMapStart()
-{
-    PrecacheParticle("achieved");
-}
-
-PartyEffect(client)
-{
-    AttachThrowAwayParticle(client, "achieved", NULL_VECTOR, "eyes", 5.0);
-}
-
 public Event_PlayerUse(Handle:event, const String:name[], bool:dontBroadcast)
 {
     new client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -261,7 +251,7 @@ ShowUpgradeInformation(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH
     new current_level = GetUpgradeLevel(client, upgrade, sWeaponName);
     new max_level = GetUpgradeMaxLevel(upgrade, sWeaponName);
     new experience = GetWeaponExperience(client, sWeaponName);
-    new experience_required = GetUpgradeExperienceRequired(client, upgrade, sWeaponName, current_level + 1);
+    new experience_required = GetExperienceRequiredForNextUpgrade(client);
     
     SetPanelTitle(panel, sUpgradeName);
     DrawPanelText(panel, " ");
@@ -313,11 +303,10 @@ public UpgradePanelHandler(Handle:menu, MenuAction:action, client, selected_item
         {
             new upgrade = gUpgradeSelected[client];
             new desired_level = GetUpgradeLevel(client, upgrade, sWeaponName) + 1;
-            new experience_required = GetUpgradeExperienceRequired(client, upgrade, sWeaponName, desired_level);
+            new experience_required = GetExperienceRequiredForNextUpgrade(client);
             
             if(RemoveWeaponExperience(client, sWeaponName, experience_required))
             {
-                PartyEffect(client);
                 Upgrade_ChatMessage(client, "You purchased an upgrade!");
                 SetUpgradeLevel(client, upgrade, sWeaponName, desired_level);
             }
