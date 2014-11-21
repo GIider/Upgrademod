@@ -37,6 +37,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     
     CreateNative("GetAmountOfPurchasedUpgrades", Native_GetAmountOfPurchasedUpgrades);
     CreateNative("GetAmountOfAvailableUpgrades", Native_GetAmountOfAvailableUpgrades);
+    CreateNative("GetTotalAmountOfPurchasedUpgrades", Native_GetTotalAmountOfPurchasedUpgrades);
     
     CreateNative("GetUpgradeName", Native_GetUpgradeName);
     CreateNative("GetUpgradeDescription", Native_GetUpgradeDescription);
@@ -194,6 +195,42 @@ Internal_GetAmountOfPurchasedUpgrades(client, String:sWeaponName[WEAPON_NAME_MAX
     return counter;
 }
 
+public Native_GetTotalAmountOfPurchasedUpgrades(Handle:plugin, numParams)
+{
+    new client = GetNativeCell(1);
+    
+    return Internal_GetTotalAmountOfPurchasedUpgrades(client);
+}
+
+Internal_GetTotalAmountOfPurchasedUpgrades(client)
+{
+    new counter = 0;
+    
+    new Handle:hWeaponStack = GetUpgradeableItemStack();
+        
+    decl String:sWeapon[WEAPON_NAME_MAXLENGTH];
+        
+    while(!IsStackEmpty(hWeaponStack))
+    {
+        PopStackString(hWeaponStack, sWeapon, sizeof(sWeapon));
+
+        for(new upgrade=0; upgrade < Internal_GetAmountOfUpgrades(); upgrade++)
+        {
+            if(IsUpgradeAvailableForWeapon(upgrade, sWeapon))
+            {
+                counter += GetUpgradeLevel(client, upgrade, sWeapon);
+            }
+        }
+        
+    }
+        
+    CloseHandle(hWeaponStack);
+
+    return counter;
+}
+
+
+
 public Native_GetAmountOfAvailableUpgrades(Handle:plugin, numParams)
 {
     decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
@@ -323,13 +360,14 @@ public Native_GetUpgradeMaxLevel(Handle:plugin, numParams)
 
 public Native_GetUpgradeExperienceRequired(Handle:plugin, numParams)
 {
-    new upgrade = GetNativeCell(1);
+    new client = GetNativeCell(1);
+    new upgrade = GetNativeCell(2);
     decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
-    if(GetNativeString(2, sWeaponName, sizeof(sWeaponName)) != SP_ERROR_NONE)
+    if(GetNativeString(3, sWeaponName, sizeof(sWeaponName)) != SP_ERROR_NONE)
     {
         return false;
     }
-    new level = GetNativeCell(3);
+    new level = GetNativeCell(4);
     new experience = INVALID_EXPERIENCE;
 
     Call_StartForward(hRequestedUpgradeExperienceRequired);
@@ -340,7 +378,7 @@ public Native_GetUpgradeExperienceRequired(Handle:plugin, numParams)
     Call_Finish();
     
     // Allow default handling
-    experience = PostOnUpgradeExperienceRequiredRequested(upgrade, sWeaponName, level, experience);
+    experience = PostOnUpgradeExperienceRequiredRequested(client, upgrade, sWeaponName, level, experience);
     
     return experience;
 }
@@ -416,40 +454,27 @@ WipeModifiedArray(client)
     ClearArray(hArray);
 }
 
-PostOnUpgradeExperienceRequiredRequested(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, experience)
+PostOnUpgradeExperienceRequiredRequested(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level, experience)
 {
     if(experience == INVALID_EXPERIENCE)
     {
-        new constant;
-        new Float:fModifier;
+        new upgrades_purchased = Internal_GetTotalAmountOfPurchasedUpgrades(client);
         new Float:fConVarModifier = GetUpgradeExperienceModifier(upgrade);
-        
-        // perform default calculation
-        if(IsTierOneWeapon(sWeaponName))
-        {
-            constant = TIER_ONE_COSTS;
-            fModifier = TIER_ONE_MODIFIER;
-        }
-        else if(IsTierTwoWeapon(sWeaponName))
-        {
-            constant = TIER_TWO_COSTS;
-            fModifier = TIER_TWO_MODIFIER;
-        }
-        else if(IsMeleeWeapon(sWeaponName))
-        {
-            constant = MELEE_COSTS;
-            fModifier = MELEE_MODIFIER;
-        }
-        else
-        {
-            Upgrademod_LogError("Could not calculate default exp for weapon \"%s\"", sWeaponName);
-            experience = 99999999;
-            
-            return experience;
-        }
-        
-        experience = RoundToCeil((constant + level * (constant * level * fModifier)) * fConVarModifier);
+
+        experience = RoundToCeil(CalculateExperienceRequired(upgrades_purchased + 1) * fConVarModifier);
     }
     
     return experience;
+}
+
+CalculateExperienceRequired(upgrade_number)
+{
+    if(upgrade_number == 1)
+    {
+        return COST_STARTING;
+    }
+    else
+    {
+        return RoundToCeil(CalculateExperienceRequired(upgrade_number - 1) * COST_PERCENTAGE_INCREASE);
+    }
 }

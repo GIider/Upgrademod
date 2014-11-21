@@ -16,7 +16,7 @@ static const	GRENADE_LAUNCHER_OFFSET_IAMMO	= 68;
 /** Get a stack containing all weapons
  * Example usage:
  * 
-new Handle:hWeaponStack = GetWeaponStack();
+new Handle:hWeaponStack = GetUpgradeableItemStack();
     
 decl String:sWeapon[WEAPON_NAME_MAXLENGTH];
     

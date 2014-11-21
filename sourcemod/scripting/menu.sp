@@ -261,7 +261,7 @@ ShowUpgradeInformation(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH
     new current_level = GetUpgradeLevel(client, upgrade, sWeaponName);
     new max_level = GetUpgradeMaxLevel(upgrade, sWeaponName);
     new experience = GetWeaponExperience(client, sWeaponName);
-    new experience_required = GetUpgradeExperienceRequired(upgrade, sWeaponName, current_level + 1);
+    new experience_required = GetUpgradeExperienceRequired(client, upgrade, sWeaponName, current_level + 1);
     
     SetPanelTitle(panel, sUpgradeName);
     DrawPanelText(panel, " ");
@@ -313,7 +313,7 @@ public UpgradePanelHandler(Handle:menu, MenuAction:action, client, selected_item
         {
             new upgrade = gUpgradeSelected[client];
             new desired_level = GetUpgradeLevel(client, upgrade, sWeaponName) + 1;
-            new experience_required = GetUpgradeExperienceRequired(upgrade, sWeaponName, desired_level);
+            new experience_required = GetUpgradeExperienceRequired(client, upgrade, sWeaponName, desired_level);
             
             if(RemoveWeaponExperience(client, sWeaponName, experience_required))
             {

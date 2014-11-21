@@ -27,12 +27,7 @@
 
 // Default costs for upgrades
 
-#define TIER_ONE_MODIFIER 0.75
-#define TIER_TWO_MODIFIER 1.0
-#define MELEE_MODIFIER 0.95
-
-#define TIER_ONE_COSTS 500
-#define TIER_TWO_COSTS 1000
-#define MELEE_COSTS 900
+#define COST_STARTING            400
+#define COST_PERCENTAGE_INCREASE 1.05
 
 #define INVALID_EXPERIENCE -1

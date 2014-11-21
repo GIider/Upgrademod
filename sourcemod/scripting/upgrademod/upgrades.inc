@@ -15,6 +15,7 @@ native GetAmountOfUpgrades();
 
 native GetAmountOfAvailableUpgrades(String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 native GetAmountOfPurchasedUpgrades(client, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
+native GetTotalAmountOfPurchasedUpgrades(client);
 
 native bool:WeaponHasUpgrades(String:sWeaponname[WEAPON_NAME_MAXLENGTH]);
 
@@ -26,7 +27,7 @@ native GetUpgradeName(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], String
 
 native GetUpgradeMaxLevel(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
-native GetUpgradeExperienceRequired(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
+native GetUpgradeExperienceRequired(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
 
 native Float:GetUpgradeExperienceModifier(upgrade);
 native RegisterUpgradeExperienceModifierConVar(String:sUpgradeShortname[UPGRADE_SHORTNAME_MAXLENGTH]);
