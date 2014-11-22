@@ -38,18 +38,16 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     
     CreateNative("GetAmountOfPurchasedUpgrades", Native_GetAmountOfPurchasedUpgrades);
     CreateNative("GetAmountOfAvailableUpgrades", Native_GetAmountOfAvailableUpgrades);
-    CreateNative("GetExperienceRequiredForNextUpgrade", Native_GetTotalAmountOfPurchasedUpgrades);
+    CreateNative("GetExperienceRequiredForNextUpgrade", Native_GetExperienceRequiredForNextUpgrade);
     
     CreateNative("GetUpgradeName", Native_GetUpgradeName);
     CreateNative("GetUpgradeDescription", Native_GetUpgradeDescription);
     CreateNative("GetUpgradeMaxLevel", Native_GetUpgradeMaxLevel);
-    CreateNative("GetUpgradeExperienceRequired", Native_GetExperienceRequiredForNextUpgrade);
     
     CreateNative("IsUpgradeAvailableForWeapon", Native_IsUpgradeAvailableForWeapon);
     
     CreateNative("SetUpgradeLevel", Native_SetUpgradeLevel);
     CreateNative("GetUpgradeLevel", Native_GetUpgradeLevel);
-    CreateNative("PurchaseTemporaryUpgrade", Native_PurchaseTemporaryUpgrade);
     CreateNative("PurchasePermanentUpgrade", Native_PurchasePermanentUpgrade);
 
     CreateNative("GetModifiedUpgradeArray", Native_GetModifiedUpgradeArray);
@@ -365,8 +363,9 @@ public Native_GetUpgradeMaxLevel(Handle:plugin, numParams)
 public Native_GetExperienceRequiredForNextUpgrade(Handle:plugin, numParams)
 {
     new client = GetNativeCell(1);
+    new upgrades_purchased = Internal_GetTotalAmountOfPurchasedUpgrades(client);
 
-    return Internal_GetExperienceRequiredForNextUpgrade(client);
+    return Internal_GetExperienceRequiredForUpgrade(upgrades_purchased);
 }
 
 public Native_GetUpgradeLevel(Handle:plugin, numParams)
@@ -428,21 +427,6 @@ Internal_SetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENG
     Call_Finish();
 }
 
-public Native_PurchaseTemporaryUpgrade(Handle:plugin, numParams)
-{
-    new client = GetNativeCell(1);
-    new upgrade = GetNativeCell(2);
-    
-    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
-    GetNativeString(3, sWeaponName, sizeof(sWeaponName));
-
-    Call_StartForward(hUpgradePurchased);
-    Call_PushCell(client);
-    Call_PushCell(upgrade);
-    Call_PushCell(-1);
-    Call_Finish();
-}
-
 public Native_PurchasePermanentUpgrade(Handle:plugin, numParams)
 {
     new client = GetNativeCell(1);
@@ -488,17 +472,15 @@ WipeModifiedArray(client)
     ClearArray(hArray);
 }
 
-Internal_GetExperienceRequiredForNextUpgrade(client)
+Internal_GetExperienceRequiredForUpgrade(upgrades_purchased)
 {
-    new upgrades_purchased = Internal_GetTotalAmountOfPurchasedUpgrades(client);
-
-    if(upgrades_purchased == 1)
+    if(upgrades_purchased == 0)
     {
         return COST_STARTING;
     }
     else
     {
-        return RoundToCeil(GetExperienceRequiredForNextUpgrade(upgrades_purchased - 1) * COST_PERCENTAGE_INCREASE);
+        return RoundToCeil(Internal_GetExperienceRequiredForUpgrade(upgrades_purchased - 1) * COST_PERCENTAGE_INCREASE);
     }
 }
 

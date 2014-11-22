@@ -10,6 +10,7 @@ public Plugin:myinfo =
 #define SELECTION_CANCEL           2
 #define SELECTION_DEBUG            3
 #define SELECTION_BROWSE           4
+#define SELECTION_RESET            5
 
 #define SELECTION_BUY_UPGRADE      1
 #define SELECTION_REFUND_UPGRADE   2
@@ -87,6 +88,12 @@ ShowUpgradeMenu(client)
     Format(sLine, sizeof(sLine), "You have %d experience left for this weapon", experience);
     DrawPanelText(panel, sLine);
 
+    new cost = GetExperienceRequiredForNextUpgrade(client);
+    Format(sLine, sizeof(sLine), "Your next upgrade will cost %d experience", cost);
+    DrawPanelText(panel, sLine);
+
+    DrawPanelText(panel, " ");
+    
     new amount_of_upgrades = GetAmountOfPurchasedUpgrades(client, sWeaponName);
     new max_amount_of_upgrades = GetAmountOfAvailableUpgrades(sWeaponName);
     Format(sLine, sizeof(sLine), "Upgrade (%d / %d)", amount_of_upgrades, max_amount_of_upgrades);
@@ -95,6 +102,7 @@ ShowUpgradeMenu(client)
     DrawPanelItem(panel, "Close");
     DrawPanelItem(panel, "Give yourself free EXP", GetAdminFlag(GetUserAdmin(client), Admin_RCON) == true ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
     DrawPanelItem(panel, "Browse all upgrades");
+    DrawPanelItem(panel, "Reset your weapon");
     
     SendPanelToClient(panel, client, UpgradeMenuHandler, 10);
     
@@ -115,11 +123,6 @@ public UpgradeMenuHandler(Handle:menu, MenuAction:action, client, selected_item)
     {
         case MenuAction_Select:
         {
-            if(!IsValidPlayer(client))
-            {
-                return;
-            }
-            
             if(selected_item == SELECTION_UPGRADE_WEAPON)
             {
                 ShowUpgradeWeaponMenu(client, sWeaponName);
@@ -131,6 +134,10 @@ public UpgradeMenuHandler(Handle:menu, MenuAction:action, client, selected_item)
             else if(selected_item == SELECTION_BROWSE)
             {
                 ShowBrowseWeaponMenu(client);
+            }
+            else if(selected_item == SELECTION_RESET)
+            {
+                ShowResetDialogMenu(client);
             }
         }
         case MenuAction_End:
@@ -144,10 +151,7 @@ ShowBrowseWeaponMenu(client)
 {
     new Handle:menu = CreateMenu(BrowseWeaponHandler, MENU_ACTIONS_DEFAULT);
 
-    decl String:sTitle[1000];
-    Format(sTitle, sizeof(sTitle), "<< UPGRADE BROWSER >>");
-
-    SetMenuTitle(menu, sTitle);
+    SetMenuTitle(menu, "<< UPGRADE BROWSER >>");
     
     new Handle:hWeaponStack = GetUpgradeableItemStack();
     
@@ -163,6 +167,50 @@ ShowBrowseWeaponMenu(client)
     
     SetMenuExitButton(menu, true);
     DisplayMenu(menu, client, MENU_TIME_FOREVER);
+}
+
+ShowResetDialogMenu(client)
+{
+    new Handle:panel = CreatePanel();
+    
+    SetPanelTitle(panel, "<< RESET UPGRADES >>");
+    DrawPanelText(panel, " ");
+    DrawPanelText(panel, " ");
+
+    DrawPanelText(panel, "Resetting your weapon will return 50% of the invested experience");
+
+    DrawPanelItem(panel, "Reset");
+    DrawPanelItem(panel, "Cancel");
+    
+    SendPanelToClient(panel, client, ResetDialogHandler, 10);
+    
+    CloseHandle(panel);
+}
+
+public ResetDialogHandler(Handle:menu, MenuAction:action, client, selected_item)
+{
+    if (!IsValidPlayer(client))
+    {
+        return;
+    }
+    
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    strcopy(sWeaponName, sizeof(sWeaponName), sWeaponNameArray[client]);
+    
+    switch (action)
+    {
+        case MenuAction_Select:
+        {            
+            if(selected_item == 1)
+            {
+                // TODO: Implement
+            }
+        }
+        case MenuAction_End:
+        {
+            CloseHandle(menu);
+        }
+    }
 }
 
 public BrowseWeaponHandler(Handle:menu, MenuAction:action, client, selected_item)
