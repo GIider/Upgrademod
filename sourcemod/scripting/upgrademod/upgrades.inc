@@ -28,12 +28,14 @@ native GetUpgradeName(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], String
 native GetUpgradeMaxLevel(upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
 native GetExperienceRequiredForNextUpgrade(client);
+native GetExperienceRequiredForUpgrade(upgrades_purchased);
 
 native SetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH], level);
 native GetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
+// Reset the upgrades for a client, refunding a percentage
+native ResetUpgradesForClient(client, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
 native PurchasePermanentUpgrade(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
-native PurchaseTemporaryUpgrade(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENGTH]);
 
 // Returns the handle to a adt_array that contains
 // a adt_array that you can index with a upgrade number

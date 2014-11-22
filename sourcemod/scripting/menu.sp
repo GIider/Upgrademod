@@ -102,7 +102,7 @@ ShowUpgradeMenu(client)
     DrawPanelItem(panel, "Close");
     DrawPanelItem(panel, "Give yourself free EXP", GetAdminFlag(GetUserAdmin(client), Admin_RCON) == true ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
     DrawPanelItem(panel, "Browse all upgrades");
-    DrawPanelItem(panel, "Reset your weapon");
+    DrawPanelItem(panel, "Reset your weapon", amount_of_upgrades > 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
     
     SendPanelToClient(panel, client, UpgradeMenuHandler, 10);
     
@@ -203,7 +203,7 @@ public ResetDialogHandler(Handle:menu, MenuAction:action, client, selected_item)
         {            
             if(selected_item == 1)
             {
-                // TODO: Implement
+                ResetUpgradesForClient(client, sWeaponName);
             }
         }
         case MenuAction_End:

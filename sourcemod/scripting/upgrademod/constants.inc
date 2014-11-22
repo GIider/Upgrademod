@@ -25,7 +25,8 @@
 // Max length for a convar
 #define CONVAR_MAXLENGTH UPGRADE_SHORTNAME_MAXLENGTH + 20
 
-// Default costs for upgrades
+// Upgrade costs
 
 #define COST_STARTING            400
 #define COST_PERCENTAGE_INCREASE 1.05
+#define REFUND_PERCENTAGE        0.5

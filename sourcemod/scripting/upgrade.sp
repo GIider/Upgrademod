@@ -35,10 +35,12 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     
     CreateNative("GetAmountOfUpgrades", Native_GetAmountOfUpgrades);
     CreateNative("WeaponHasUpgrades", Native_WeaponHasUpgrades);
+    CreateNative("GetTotalAmountOfPurchasedUpgrades", Native_GetTotalAmountOfPurchasedUpgrades);
     
     CreateNative("GetAmountOfPurchasedUpgrades", Native_GetAmountOfPurchasedUpgrades);
     CreateNative("GetAmountOfAvailableUpgrades", Native_GetAmountOfAvailableUpgrades);
     CreateNative("GetExperienceRequiredForNextUpgrade", Native_GetExperienceRequiredForNextUpgrade);
+    CreateNative("GetExperienceRequiredForUpgrade", Native_GetExperienceRequiredForUpgrade);
     
     CreateNative("GetUpgradeName", Native_GetUpgradeName);
     CreateNative("GetUpgradeDescription", Native_GetUpgradeDescription);
@@ -49,6 +51,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
     CreateNative("SetUpgradeLevel", Native_SetUpgradeLevel);
     CreateNative("GetUpgradeLevel", Native_GetUpgradeLevel);
     CreateNative("PurchasePermanentUpgrade", Native_PurchasePermanentUpgrade);
+    CreateNative("ResetUpgradesForClient", Native_ResetUpgradesForClient);
 
     CreateNative("GetModifiedUpgradeArray", Native_GetModifiedUpgradeArray);
     CreateNative("ClearModifiedUpgradeArray", Native_ClearModifiedUpgradeArray);
@@ -427,6 +430,38 @@ Internal_SetUpgradeLevel(client, upgrade, String:sWeaponName[WEAPON_NAME_MAXLENG
     Call_Finish();
 }
 
+public Native_ResetUpgradesForClient(Handle:plugin, numParams)
+{
+    new client = GetNativeCell(1);
+    
+    decl String:sWeaponName[WEAPON_NAME_MAXLENGTH];
+    GetNativeString(2, sWeaponName, sizeof(sWeaponName));
+
+    new exp_refunded = 0;
+    new old_upgrades_purchased = GetTotalAmountOfPurchasedUpgrades(client);
+    for(new upgrade=0; upgrade < Internal_GetAmountOfUpgrades(); upgrade++)
+    {
+        if(IsUpgradeAvailableForWeapon(upgrade, sWeaponName))
+        {
+            new current_level = GetUpgradeLevel(client, upgrade, sWeaponName);
+            while (current_level > 0)
+            {
+                SetUpgradeLevel(client, upgrade, sWeaponName, current_level - 1);
+                
+                exp_refunded += Internal_GetExperienceRequiredForUpgrade(old_upgrades_purchased - 1);
+                old_upgrades_purchased -= 1;
+
+                current_level -= 1;
+            }
+        }
+    }
+    
+    exp_refunded = RoundToCeil(exp_refunded * REFUND_PERCENTAGE);
+    
+    Upgrade_ChatMessage(client, "You were refunded %d experience points!", exp_refunded);
+    GiveWeaponExperience(client, sWeaponName, exp_refunded);
+}
+
 public Native_PurchasePermanentUpgrade(Handle:plugin, numParams)
 {
     new client = GetNativeCell(1);
@@ -470,6 +505,13 @@ WipeModifiedArray(client)
     
     new Handle:hArray = hModifiedUpgrades[client];
     ClearArray(hArray);
+}
+
+public Native_GetExperienceRequiredForUpgrade(Handle:plugin, numParams)
+{
+    new upgrades_purchased = GetNativeCell(1);
+    
+    return Internal_GetExperienceRequiredForUpgrade(upgrades_purchased);
 }
 
 Internal_GetExperienceRequiredForUpgrade(upgrades_purchased)
